@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f7fb;
+}
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin: 40px auto;
+}
+
+h1 {
+    text-align: center;
+}
+
+textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}

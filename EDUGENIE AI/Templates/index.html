@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EduGenie - Learning Assistant</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎓 EduGenie</h1>
+
+        <p class="subtitle">
+            Google Gemini Powered Learning Assistant
+        </p>
+
+        <div class="card">
+
+            <label for="task">Choose a Task</label>
+
+            <select id="task">
+                <option value="qa">Ask a Question</option>
+                <option value="explain">Explain a Topic</option>
+                <option value="quiz">Generate Quiz</option>
+                <option value="summarize">Summarize Text</option>
+                <option value="learn">Learning Path</option>
+            </select>
+
+
+            <label for="inputText">Enter your content</label>
+
+            <textarea
+                id="inputText"
+                placeholder="Type your question or topic here..."
+            ></textarea>
+
+
+            <div class="buttons">
+
+                <button onclick="generateResult()">
+                    Generate
+                </button>
+
+                <button onclick="clearAll()">
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div id="status"></div>
+
+
+            <div id="resultBox">
+
+                <h2>Result</h2>
+
+                <div id="result">
+                    Your result will appear here.
+                </div>
+
+                <button onclick="copyResult()">
+                    Copy
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+<script>
+
+async function generateResult() {
+
+    const task = document.getElementById("task").value;
+    const text = document.getElementById("inputText").value.trim();
+
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    if (!text) {
+        status.innerText = "Please enter some text.";
+        return;
+    }
+
+    status.innerText = "Generating... Please wait.";
+    result.innerText = "";
+
+    let endpoint = "";
+    let body = {};
+
+    if (task === "qa") {
+
+        endpoint = "/qa";
+        body = {
+            question: text
+        };
+
+    } else if (task === "explain") {
+
+        endpoint = "/explain";
+        body = {
+            text: text
+        };
+
+    } else if (task === "quiz") {
+
+        endpoint = "/quiz";
+        body = {
+            text: text
+        };
+
+    } else if (task === "summarize") {
+
+        endpoint = "/summarize";
+        body = {
+            text: text
+        };
+
+    } else if (task === "learn") {
+
+        endpoint = "/learn/recommendations";
+        body = {
+            text: text
+        };
+    }
+
+
+    try {
+
+        const response = await fetch(endpoint, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(body)
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail || "Something went wrong."
+            );
+
+        }
+
+
+        if (task === "quiz") {
+
+            displayQuiz(data.result);
+
+        } else {
+
+            result.innerText = data.result;
+
+        }
+
+
+        status.innerText = "Done!";
+
+    }
+
+    catch (error) {
+
+        status.innerText = "Error";
+        result.innerText = error.message;
+
+    }
+
+}
+
+
+function displayQuiz(quiz) {
+
+    const result = document.getElementById("result");
+
+    result.innerHTML = "";
+
+    quiz.questions.forEach((q, index) => {
+
+        const questionDiv = document.createElement("div");
+
+        questionDiv.innerHTML = `
+
+            <h3>
+                ${index + 1}. ${q.question}
+            </h3>
+
+            <ul>
+                ${q.options.map(option =>
+                    `<li>${option}</li>`
+                ).join("")}
+            </ul>
+
+            <p>
+                <strong>Answer:</strong>
+                ${q.correct_answer}
+            </p>
+
+            <p>
+                ${q.explanation}
+            </p>
+
+            <hr>
+
+        `;
+
+        result.appendChild(questionDiv);
+
+    });
+
+}
+
+
+function clearAll() {
+
+    document.getElementById("inputText").value = "";
+
+    document.getElementById("result").innerText =
+        "Your result will appear here.";
+
+    document.getElementById("status").innerText = "";
+
+}
+
+
+function copyResult() {
+
+    const text =
+        document.getElementById("result").innerText;
+
+    navigator.clipboard.writeText(text);
+
+    document.getElementById("status").innerText =
+        "Result copied!";
+
+}
+
+</script>
+
+</body>
+</html>
